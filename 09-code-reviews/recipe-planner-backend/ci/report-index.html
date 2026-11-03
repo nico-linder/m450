@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recipe Planner Backend – Test Reports</title>
+    <!-- Template used by the GitHub Actions pipeline; the @...@ placeholders are replaced per pipeline run -->
+    <style>
+        body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 760px; margin: 3rem auto; padding: 0 1rem; color: #1f2328; }
+        h1 { margin-bottom: 0.25rem; }
+        .meta { color: #59636e; margin-bottom: 2rem; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        a.card { display: block; padding: 1.25rem; border: 1px solid #d1d9e0; border-radius: 8px; text-decoration: none; color: inherit; }
+        a.card:hover { border-color: #0969da; background: #f6f8fa; }
+        a.card h2 { margin: 0 0 0.5rem; font-size: 1.15rem; color: #0969da; }
+        a.card p { margin: 0; color: #59636e; }
+        footer { margin-top: 2rem; font-size: 0.9rem; color: #59636e; }
+    </style>
+</head>
+<body>
+<h1>Recipe Planner Backend</h1>
+<div class="meta">
+    Pipeline-Lauf #@RUN_NUMBER@ · Branch <code>@BRANCH@</code> · Commit <code>@COMMIT@</code> · @DATE@
+</div>
+
+<div class="cards">
+    <a class="card" href="surefire-report.html">
+        <h2>Testresultate</h2>
+        <p>Surefire-Report: alle Unit- und Integrationstests mit Status und Laufzeit.</p>
+    </a>
+    <a class="card" href="jacoco/index.html">
+        <h2>Code Coverage</h2>
+        <p>JaCoCo-Report: Abdeckung pro Package, Klasse und Zeile.</p>
+    </a>
+</div>
+
+<footer>
+    <a href="@RUN_URL@">Zum Pipeline-Lauf auf GitHub Actions</a>
+</footer>
+</body>
+</html>
+
