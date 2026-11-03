@@ -19,7 +19,7 @@ const Browse = () => {
                 <Row>
                     {recipes.map((recipe) => (
                         <Col key={recipe.id} sm={12} md={6} lg={4} xl={3}>
-                            <Recipe title={recipe.name} description={recipe.description} image={recipe.imageUrl} />
+                            <Recipe id={recipe.id} title={recipe.name} description={recipe.description} image={recipe.imageUrl} />
                         </Col>
                     ))}
                 </Row>

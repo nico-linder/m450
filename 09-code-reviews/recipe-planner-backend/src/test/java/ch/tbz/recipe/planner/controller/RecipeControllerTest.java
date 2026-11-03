@@ -18,14 +18,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -199,6 +203,74 @@ class RecipeControllerTest {
                     .andExpect(status().isBadRequest());
 
             verifyNoInteractions(service);
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /api/recipes/{recipeId}")
+    class UpdateRecipe {
+
+        private static final String UPDATE_JSON = """
+                {
+                  "name": "Lasagne Verdure",
+                  "description": "Vegetarian",
+                  "imageUrl": "https://example.com/verdure.jpg",
+                  "ingredients": [{"name": "Zucchini", "unit": "PIECE", "amount": 2}]
+                }
+                """;
+
+        @Test
+        @DisplayName("returns 200 and the updated recipe")
+        void updateExisting() throws Exception {
+            Recipe updated = new Recipe(lasagneId, "Lasagne Verdure", "Vegetarian", "https://example.com/verdure.jpg",
+                    List.of(new Ingredient(UUID.randomUUID(), "Zucchini", null, Unit.PIECE, 2)));
+            when(service.updateRecipe(eq(lasagneId), any(Recipe.class))).thenReturn(Optional.of(updated));
+
+            mockMvc.perform(put("/api/recipes/{id}", lasagneId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(UPDATE_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(lasagneId.toString()))
+                    .andExpect(jsonPath("$.name").value("Lasagne Verdure"))
+                    .andExpect(jsonPath("$.ingredients[0].name").value("Zucchini"));
+
+            ArgumentCaptor<Recipe> captor = ArgumentCaptor.forClass(Recipe.class);
+            verify(service).updateRecipe(eq(lasagneId), captor.capture());
+            assertThat(captor.getValue().getName()).isEqualTo("Lasagne Verdure");
+        }
+
+        @Test
+        @DisplayName("returns 404 if the recipe does not exist")
+        void updateUnknown() throws Exception {
+            UUID unknown = UUID.randomUUID();
+            when(service.updateRecipe(eq(unknown), any(Recipe.class))).thenReturn(Optional.empty());
+
+            mockMvc.perform(put("/api/recipes/{id}", unknown)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(UPDATE_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(""));
+        }
+
+        @Test
+        @DisplayName("returns 400 for an id that is not a UUID")
+        void invalidId() throws Exception {
+            mockMvc.perform(put("/api/recipes/{id}", "abc")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(UPDATE_JSON))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(service);
+        }
+
+        @Test
+        @DisplayName("CORS: PUT from the React frontend is allowed (preflight)")
+        void corsPreflight() throws Exception {
+            mockMvc.perform(options("/api/recipes/{id}", lasagneId)
+                            .header("Origin", "http://localhost:3000")
+                            .header("Access-Control-Request-Method", "PUT"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:3000"));
         }
     }
 

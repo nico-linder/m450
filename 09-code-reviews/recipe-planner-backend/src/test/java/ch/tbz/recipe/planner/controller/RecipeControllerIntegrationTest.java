@@ -89,6 +89,57 @@ class RecipeControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("PUT /api/recipes/{id} updates an existing recipe, GET returns the new values")
+    void updateRecipe() {
+        String id =
+                given()
+                        .contentType(ContentType.JSON)
+                        .body("""
+                                {"name": "Old", "description": "before", "ingredients": [{"name": "Salt", "unit": "GRAMM", "amount": 5}]}
+                                """)
+                .when()
+                        .post()
+                .then()
+                        .statusCode(200)
+                .extract().path("id");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"name": "New", "description": "after", "imageUrl": "https://example.com/new.jpg",
+                         "ingredients": [{"name": "Pepper", "unit": "GRAMM", "amount": 2}, {"name": "Oil", "unit": "DECILITRE", "amount": 1}]}
+                        """)
+        .when()
+                .put("/{id}", id)
+        .then()
+                .statusCode(200)
+                .body("id", equalTo(id))
+                .body("name", equalTo("New"));
+
+        given()
+        .when()
+                .get("/recipe/{id}", id)
+        .then()
+                .statusCode(200)
+                .body("name", equalTo("New"))
+                .body("description", equalTo("after"))
+                .body("imageUrl", equalTo("https://example.com/new.jpg"))
+                .body("ingredients.name", containsInAnyOrder("Pepper", "Oil"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/recipes/{id} with an unknown id returns 404")
+    void updateUnknown() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"name\": \"X\", \"ingredients\": []}")
+        .when()
+                .put("/{id}", UUID.randomUUID())
+        .then()
+                .statusCode(404);
+    }
+
+    @Test
     @DisplayName("current behaviour: GET with an unknown id returns 200 with an empty body")
     void unknownId() {
         given()

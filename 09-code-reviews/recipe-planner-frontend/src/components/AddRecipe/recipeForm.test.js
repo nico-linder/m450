@@ -1,4 +1,28 @@
-import {EMPTY_RECIPE, toRecipeRequest} from "./recipeForm";
+import {EMPTY_INGREDIENT, EMPTY_RECIPE, toFormValues, toRecipeRequest} from "./recipeForm";
+
+describe("toFormValues", () => {
+    test("converts null values of a loaded recipe into empty strings", () => {
+        const values = toFormValues({
+            id: "1",
+            name: "Soup",
+            description: null,
+            imageUrl: null,
+            ingredients: [{id: "i", name: "Water", comment: null, unit: "LITRE", amount: 2}],
+        });
+
+        expect(values).toEqual({
+            name: "Soup",
+            description: "",
+            imageUrl: "",
+            ingredients: [{name: "Water", comment: "", unit: "LITRE", amount: 2}],
+        });
+    });
+
+    test("adds one empty ingredient row if the recipe has no ingredients", () => {
+        expect(toFormValues({name: "Empty", ingredients: []}).ingredients).toEqual([EMPTY_INGREDIENT]);
+        expect(toFormValues({name: "Empty", ingredients: null}).ingredients).toEqual([EMPTY_INGREDIENT]);
+    });
+});
 
 describe("toRecipeRequest", () => {
     test("trims texts, converts amounts to numbers and sends empty optional fields as null", () => {
