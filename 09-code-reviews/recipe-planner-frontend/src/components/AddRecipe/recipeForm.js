@@ -26,6 +26,27 @@ export const toRecipeRequest = (formValues) => ({
     })),
 });
 
+/**
+ * Converts a recipe from the backend into form values (null becomes an empty string,
+ * a recipe without ingredients gets one empty ingredient row).
+ *
+ * @param {object} recipe recipe from the REST API
+ * @returns {object} values for react-hook-form
+ */
+export const toFormValues = (recipe) => ({
+    name: recipe.name ?? "",
+    description: recipe.description ?? "",
+    imageUrl: recipe.imageUrl ?? "",
+    ingredients: recipe.ingredients?.length
+        ? recipe.ingredients.map((ingredient) => ({
+            name: ingredient.name ?? "",
+            comment: ingredient.comment ?? "",
+            unit: ingredient.unit ?? "PIECE",
+            amount: ingredient.amount ?? 1,
+        }))
+        : [EMPTY_INGREDIENT],
+});
+
 const emptyToNull = (value) => {
     const trimmed = (value ?? "").trim();
     return trimmed === "" ? null : trimmed;
