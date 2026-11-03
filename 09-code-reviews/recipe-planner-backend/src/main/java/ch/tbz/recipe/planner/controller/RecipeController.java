@@ -41,4 +41,16 @@ public class RecipeController {
         return new ResponseEntity<>(service.addRecipe(recipe), HttpStatus.OK);
     }
 
+    /**
+     * Updates an existing recipe.
+     *
+     * @return 200 with the updated recipe, or 404 if no recipe with this id exists
+     */
+    @PutMapping("/api/recipes/{recipeId}")
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable UUID recipeId, @RequestBody Recipe recipe) {
+        return service.updateRecipe(recipeId, recipe)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 }
